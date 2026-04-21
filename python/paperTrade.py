@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import yfinance as yf
 from datetime import date
 import os
+from pathlib import Path
+pd.set_option('display.precision', 2)
 
 
 positions = {
@@ -53,8 +55,8 @@ df = pd.DataFrame(rows)
 df = df.fillna(0)
 print(df)
 
-
-file = "paper_trade_results.csv"
+current_dir = Path(__file__).parent
+file = current_dir / "paper_trade_results.csv"
 if os.path.exists(file):
     df.to_csv(file, mode='a', header=False, index=False)
 else:
