@@ -144,59 +144,53 @@ class PortfolioCalculator {
 
     //JSON OUTPUT
     void printJSON() {
-        PortfolioRow best = bestPerformer();
-        PortfolioRow worst = worstPerformer();
+    PortfolioRow best  = bestPerformer();
+    PortfolioRow worst = worstPerformer();
 
-        std::cout << std::fixed << std::setprecision(2);
-        std::cout << "{\n";
-        std::cout << "  \"total_value\": "       << total_value()    << ",\n";
-        std::cout << "  \"total_pnl\": "         << totalPNL()      << ",\n";
-        std::cout << "  \"total_return\": "      << totalReturn()   << ",\n";
-        std::cout << "  \"spy_return\": "        << spyReturn()     << ",\n";
-        std::cout << "  \"vs_spy\": "            << vsSpy()         << ",\n";
-        std::cout << "  \"best_performer\": \""  << best.symbol     << "\",\n";
-        std::cout << "  \"worst_performer\": \"" << worst.symbol    << "\",\n";
-        std::cout << "  \"positions\": [\n";
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << "{\n";
+    std::cout << "  \"total_value\": "       << total_value()    << ",\n";
+    std::cout << "  \"total_pnl\": "         << totalPNL()      << ",\n";
+    std::cout << "  \"total_return\": "      << totalReturn()   << ",\n";
+    std::cout << "  \"spy_return\": "        << spyReturn()     << ",\n";
+    std::cout << "  \"vs_spy\": "            << vsSpy()         << ",\n";
+    std::cout << "  \"best_performer\": \""  << best.symbol     << "\",\n";
+    std::cout << "  \"worst_performer\": \"" << worst.symbol    << "\",\n";
+    std::cout << "  \"positions\": [\n";
 
-        int count = 0;
-
-        for (int i = 0; i < rows.size(); i++) {
-            if (rows[i].symbol == "SPY"){
-                continue;
-                count++;
-            }
+    // first build a filtered list WITHOUT SPY
+    // so we know exactly how many positions we have
+    std::vector<PortfolioRow> positions;
+    for (const PortfolioRow& row : rows) {
+        if (row.symbol != "SPY") {
+            positions.push_back(row);
         }
-
-        int printed = 0;
-        for (int i = 0; i < rows.size(); i++){
-            const PortfolioRow& row = rows[i];
-
-            if (row.symbol == "SPY") continue;
-
-            std::cout << "    {\n";
-            std::cout << "      \"symbol\": \""        << row.symbol        << "\",\n";
-            std::cout << "      \"shares\": "          << row.shares        << ",\n";
-            std::cout << "      \"cost_basis\": "      << row.cost_value    << ",\n";
-            std::cout << "      \"current_price\": "   << row.current_price << ",\n";
-            std::cout << "      \"cost_value\": "      << row.cost_value    << ",\n";
-            std::cout << "      \"current_value\": "   << row.current_value << ",\n";
-            std::cout << "      \"pnl\": "             << row.profit_loss          << ",\n";
-            std::cout << "      \"pct_return\": "      << row.profit_loss_percent    << "\n";
-            std::cout << "    }";
-
-
-            printed++;
-
-            if(printed < count) std::cout << ",";
-            std::cout << "\n";
-
-        }
-
-        std::cout << "   ]\n";
-        std::cout << "}\n";
-
-
     }
+
+    // now loop with a clean index so comma logic is simple
+    for (int i = 0; i < positions.size(); i++) {
+        const PortfolioRow& row = positions[i];
+        bool isLast = (i == positions.size() - 1);
+
+        std::cout << "    {\n";
+        std::cout << "      \"symbol\": \""        << row.symbol        << "\",\n";
+        std::cout << "      \"shares\": "          << row.shares        << ",\n";
+        std::cout << "      \"cost_basis\": "      << row.entry_price   << ",\n";
+        std::cout << "      \"current_price\": "   << row.current_price << ",\n";
+        std::cout << "      \"cost_value\": "      << row.cost_value    << ",\n";
+        std::cout << "      \"current_value\": "   << row.current_value << ",\n";
+        std::cout << "      \"pnl\": "             << row.profit_loss          << ",\n";
+        std::cout << "      \"pct_return\": "      << row.profit_loss_percent    << "\n";
+        std::cout << "    }";
+
+        // only add comma if this is NOT the last item
+        if (!isLast) std::cout << ",";
+        std::cout << "\n";
+    }
+
+    std::cout << "  ]\n";
+    std::cout << "}\n";
+}
 
 };
 

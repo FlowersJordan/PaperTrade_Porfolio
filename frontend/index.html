@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ── RESET & BASE ──────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:           #080c10;
+            --surface:      #0d1117;
+            --surface2:     #131920;
+            --border:       #1e2d3d;
+            --border-light: #243447;
+            --text:         #e6edf3;
+            --text-muted:   #7d8fa3;
+            --text-dim:     #3d5166;
+            --accent:       #58a6ff;
+            --accent-dim:   #1f3a5c;
+            --green:        #3fb950;
+            --green-dim:    #1a3d22;
+            --red:          #f85149;
+            --red-dim:      #3d1a1a;
+            --gold:         #e3b341;
+            --gold-dim:     #3d2e10;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* subtle grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        /* ── HEADER ────────────────────────────────────────────── */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 48px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            animation: fadeUp 0.6s ease both;
+        }
+
+        .header-left h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text);
+        }
+
+        .header-left h1 span {
+            color: var(--accent);
+        }
+
+        .header-left p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--green);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+            animation: pulse 2s ease infinite;
+        }
+
+        /* ── VS SPY HERO ───────────────────────────────────────── */
+        .vs-spy-hero {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 24px;
+            animation: fadeUp 0.6s 0.1s ease both;
+        }
+
+        .vs-side {
+            padding: 36px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .vs-side.portfolio { background: linear-gradient(135deg, #0d1117 0%, #0f1e2d 100%); }
+        .vs-side.spy       { background: linear-gradient(135deg, #0d1117 0%, #1a1a0d 100%); }
+
+        .vs-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .vs-return {
+            font-size: 3.2rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1;
+        }
+
+        .vs-return.positive { color: var(--green); }
+        .vs-return.negative { color: var(--red); }
+        .vs-return.neutral  { color: var(--text-muted); }
+
+        .vs-sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .vs-divider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0 24px;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            gap: 8px;
+        }
+
+        .vs-word {
+            font-size: 0.65rem;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+        }
+
+        .vs-delta {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .vs-delta.winning { color: var(--gold); }
+        .vs-delta.losing  { color: var(--red); }
+
+        /* ── SUMMARY CARDS ─────────────────────────────────────── */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+            animation: fadeUp 0.6s 0.2s ease both;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 22px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .card:hover {
+            border-color: var(--border-light);
+            transform: translateY(-2px);
+        }
+
+        .card-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .card-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: var(--text);
+        }
+
+        .card-value.positive { color: var(--green); }
+        .card-value.negative { color: var(--red); }
+        .card-value.accent   { color: var(--accent); }
+
+        .card-sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--text-dim);
+            margin-top: 6px;
+        }
+
+        /* ── HIGHLIGHTS ROW ────────────────────────────────────── */
+        .highlights {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+            animation: fadeUp 0.6s 0.3s ease both;
+        }
+
+        .highlight-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .highlight-card.best  { border-left: 3px solid var(--green); }
+        .highlight-card.worst { border-left: 3px solid var(--red); }
+
+        .highlight-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .highlight-symbol {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .highlight-card.best  .highlight-symbol { color: var(--green); }
+        .highlight-card.worst .highlight-symbol { color: var(--red); }
+
+        .highlight-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .highlight-card.best  .highlight-badge { background: var(--green-dim); color: var(--green); }
+        .highlight-card.worst .highlight-badge { background: var(--red-dim);   color: var(--red); }
+
+        /* ── TABLE ─────────────────────────────────────────────── */
+        .table-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            animation: fadeUp 0.6s 0.4s ease both;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--text);
+        }
+
+        .table-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            background: var(--surface2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            padding: 12px 24px;
+            text-align: left;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            font-weight: 400;
+        }
+
+        thead th:not(:first-child) { text-align: right; }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+            animation: fadeIn 0.4s ease both;
+        }
+
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--surface2); }
+
+        td {
+            padding: 14px 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        td:not(:first-child) { text-align: right; }
+
+        /* symbol column */
+        .symbol-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .symbol-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.05em;
+            flex-shrink: 0;
+        }
+
+        .symbol-name {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.85rem;
+            letter-spacing: 0.02em;
+        }
+
+        /* return pill */
+        .return-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .return-pill.positive { background: var(--green-dim); color: var(--green); }
+        .return-pill.negative { background: var(--red-dim);   color: var(--red); }
+        .return-pill.neutral  { background: var(--surface2);  color: var(--text-muted); }
+
+        /* bar chart column */
+        .bar-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .bar-track {
+            width: 80px;
+            height: 4px;
+            background: var(--surface2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.8s ease;
+        }
+
+        .bar-fill.positive { background: var(--green); }
+        .bar-fill.negative { background: var(--red); }
+
+        /* ── FOOTER ────────────────────────────────────────────── */
+        footer {
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeUp 0.6s 0.5s ease both;
+        }
+
+        footer p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        footer span { color: var(--accent); }
+
+        /* ── ANIMATIONS ────────────────────────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--green); }
+            50%       { opacity: 0.5; box-shadow: 0 0 4px var(--green); }
+        }
+
+        /* ── RESPONSIVE ────────────────────────────────────────── */
+        @media (max-width: 900px) {
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
+            .vs-return { font-size: 2.2rem; }
+        }
+
+        @media (max-width: 600px) {
+            .summary-grid { grid-template-columns: 1fr 1fr; }
+            .vs-spy-hero { grid-template-columns: 1fr; }
+            .vs-divider { flex-direction: row; padding: 16px 24px; border: none; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+            .highlights { grid-template-columns: 1fr; }
+            .bar-cell { display: none; }
+            header { flex-direction: column; align-items: flex-start; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <!-- HEADER -->
+    <header>
+        <div class="header-left">
+            <h1>Portfolio <span>Tracker</span></h1>
+            <p>Paper Trading — ThinkorSwim Strategy</p>
+        </div>
+        <div class="live-badge">
+            <div class="live-dot"></div>
+            Live Data
+        </div>
+    </header>
+
+    <!-- VS SPY HERO — most important metric front and center -->
+    {% set winning = data.vs_spy >= 0 %}
+    <div class="vs-spy-hero">
+        <div class="vs-side portfolio">
+            <div class="vs-label">My Portfolio Return</div>
+            <div class="vs-return {{ 'positive' if data.total_return >= 0 else 'negative' }}">
+                {{ '+' if data.total_return >= 0 else '' }}{{ data.total_return }}%
+            </div>
+            <div class="vs-sub">${{ "%.2f"|format(data.total_pnl) }} total P&amp;L</div>
+        </div>
+
+        <div class="vs-divider">
+            <div class="vs-word">vs</div>
+            <div class="vs-delta {{ 'winning' if winning else 'losing' }}">
+                {{ '+' if data.vs_spy >= 0 else '' }}{{ data.vs_spy }}%
+            </div>
+            <div class="vs-word">{{ 'ahead' if winning else 'behind' }}</div>
+        </div>
+
+        <div class="vs-side spy">
+            <div class="vs-label">SPY Benchmark</div>
+            <div class="vs-return {{ 'positive' if data.spy_return >= 0 else 'negative' }}">
+                {{ '+' if data.spy_return >= 0 else '' }}{{ data.spy_return }}%
+            </div>
+            <div class="vs-sub">S&amp;P 500 Index Fund</div>
+        </div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="summary-grid">
+        <div class="card">
+            <div class="card-label">Total Value</div>
+            <div class="card-value accent">${{ "%.2f"|format(data.total_value) }}</div>
+            <div class="card-sub">Stock positions only</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Total P&amp;L</div>
+            <div class="card-value {{ 'positive' if data.total_pnl >= 0 else 'negative' }}">
+                {{ '+$' if data.total_pnl >= 0 else '-$' }}{{ "%.2f"|format(data.total_pnl|abs) }}
+            </div>
+            <div class="card-sub">Unrealized gain/loss</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Best Performer</div>
+            <div class="card-value positive">{{ data.best_performer }}</div>
+            <div class="card-sub">Top returning position</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Worst Performer</div>
+            <div class="card-value negative">{{ data.worst_performer }}</div>
+            <div class="card-sub">Lowest returning position</div>
+        </div>
+    </div>
+
+    <!-- BEST / WORST HIGHLIGHTS -->
+    <div class="highlights">
+        {% for pos in data.positions %}
+            {% if pos.symbol == data.best_performer %}
+            <div class="highlight-card best">
+                <div>
+                    <div class="highlight-label">Best Performer</div>
+                    <div class="highlight-symbol">{{ pos.symbol }}</div>
+                </div>
+                <div class="highlight-badge">+{{ pos.pct_return }}%</div>
+            </div>
+            {% endif %}
+            {% if pos.symbol == data.worst_performer %}
+            <div class="highlight-card worst">
+                <div>
+                    <div class="highlight-label">Worst Performer</div>
+                    <div class="highlight-symbol">{{ pos.symbol }}</div>
+                </div>
+                <div class="highlight-badge">{{ pos.pct_return }}%</div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- POSITIONS TABLE -->
+    <div class="table-section">
+        <div class="table-header">
+            <div class="table-title">All Positions</div>
+            <div class="table-count">{{ data.positions|length }} stocks</div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Shares</th>
+                    <th>Cost Basis</th>
+                    <th>Current Price</th>
+                    <th>Market Value</th>
+                    <th>P&amp;L</th>
+                    <th>Return</th>
+                    <th>Performance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pos in data.positions %}
+                {% set is_pos = pos.pct_return >= 0 %}
+                {% set abs_return = pos.pct_return if pos.pct_return >= 0 else -pos.pct_return %}
+                <tr>
+                    <td>
+                        <div class="symbol-cell">
+                            <div class="symbol-icon">{{ pos.symbol[:2] }}</div>
+                            <div class="symbol-name">{{ pos.symbol }}</div>
+                        </div>
+                    </td>
+                    <td>{{ pos.shares }}</td>
+                    <td>${{ "%.2f"|format(pos.cost_basis) }}</td>
+                    <td>${{ "%.2f"|format(pos.current_price) }}</td>
+                    <td>${{ "%.2f"|format(pos.current_value) }}</td>
+                    <td style="color: {{ '#3fb950' if is_pos else '#f85149' }}">
+                        {{ '+$' if is_pos else '-$' }}{{ "%.2f"|format(pos.pnl|abs) }}
+                    </td>
+                    <td>
+                        <span class="return-pill {{ 'positive' if is_pos else 'negative' }}">
+                            {{ '+' if is_pos else '' }}{{ pos.pct_return }}%
+                        </span>
+                    </td>
+                    <td>
+                        <div class="bar-cell">
+                            <div class="bar-track">
+                                <div class="bar-fill {{ 'positive' if is_pos else 'negative' }}"
+                                     style="width: {{ [abs_return * 8, 100]|min }}%">
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>Built with <span>C++ · Python · Flask</span></p>
+        <p>Paper trading — not financial advice</p>
+    </footer>
+
+</div>
+</body>
+</html>
