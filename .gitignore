@@ -1,0 +1,15 @@
+# compiled C++ files
+*.exe
+*.o
+*.out
+
+# Python
+__pycache__/
+*.pyc
+.env
+
+# data files with potentially sensitive info
+*.csv
+
+# VS Code
+.vscode/
